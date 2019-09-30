@@ -49,7 +49,9 @@ int px2 (double *, double *, double, double, double, double, double, double);
 int cymbal(double, double, double, double, int);
 int spoint (WINDOW, double, double, double, double, int, double, int);
 #else
-extern void dipcal();
+void calcOrientation(double, double, double, int, int, double *, double *);
+extern void dipcal(double [10][4], int, double *, double *,
+                                        double *, double *, double *);//extern void dipcal();
 int cymplt();
 int MetType();
 int BedDip();
@@ -581,7 +583,85 @@ double plotdt[MAX_LINEMAP_EVENTS][NUM_LINEMAP_TERMS]; /* array of symbol data */
    freeqdtrimat(dots,0,2,0,2,0,3);
    free_strstomat(histoire,0,2,0,2);
 }
+void calcOrientation (xLoc, yLoc, zLoc, symType, Event1Type, dip, dipdir)
+double xLoc, yLoc, zLoc;
+int symType;
+int Event1Type;
+double * dip, *dipdir;
+{
+   int i, j;
+   int sox;           /* temporary codes for symbol type */
+   int type=0;
+   int age =0;
+   int xcol,yrow;
+   double hx,vy;
+   double ***dots;
+   struct story **histoire;
+   int no = (int) countObjects (NULL_WIN);
+   BLOCK_VIEW_OPTIONS *viewOptions = getViewOptions ();
+   
+   yrow = (int) ((xLoc-1.0)/0.2);
+   xcol = (int) ((yLoc-1.3)/0.2);
+     
+   yrow--;
+   xcol+=2;
 
+   if ((dots = (double ***) qdtrimat(0,2,0,2,0,3)) == 0L)
+   {
+      xvt_dm_post_error("Not enough memory, try closing some windows");
+      return;
+   }
+   if ((histoire = (struct story **) strstomat(0,2,0,2)) == 0L)
+   {
+       xvt_dm_post_error("Not enough memory, try closing some windows");
+       freeqdtrimat(dots,0,2,0,2,0,3);
+       return;
+   }
+   dots[1][1][1] = xLoc;
+   dots[1][1][2] = yLoc;
+   dots[1][1][3] = zLoc;
+
+   histoire[1][1].again=1;
+   izero(histoire[1][1].sequence);
+   reverseEvents (dots, histoire, 1, 1);
+   //onedotmp(dots, histoire, xcol, yrow);
+   if (no == 1 && symType != 1)
+   {
+      good = FALSE;
+      error = 4;
+   }
+   else   
+   {
+      switch (symType)
+      {
+         /*case 1:
+         RockType(dots, histoire, hx, vy, plotdt);
+            break;*/
+         
+         case 3:
+   			type = FOLIATION;        
+   			sox=3;                                                               
+   			find (dots, histoire, xLoc, yLoc, zLoc, sox, age, type, dip, dipdir);
+			break;
+         case 4:
+
+   			type = FOLIATION;
+   			sox=4;
+   			age=Event1Type;
+   			find (dots, histoire, xLoc, yLoc, zLoc, sox, age, type, dip, dipdir);
+            break;
+         //case 5:
+         //   Lineation(dots, histoire, hx, vy, zLoc, Event1Type, plotdt);
+         //   break;
+         //case 6:
+         //   BdCl(dots, histoire, hx, vy, zLoc, Event1Type, plotdt);
+         //   break;
+
+         default:
+            break;
+      }
+   }
+}
 /*RockType(dots, histoire, hx, vy, plotdt)
 double ***dots;
 struct story **histoire;

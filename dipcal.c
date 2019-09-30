@@ -33,11 +33,12 @@ int type;
 double *dip, *dipdir;
 double *xl, *ym, *zn; /* direction cosines of lines */
 #endif
-{                                                         
+{            
 	double dips[9][3],r,suml,summ,sumn,temp;
    int jno;
    struct vector triplet[3];
-                     
+     	int i;
+	int j;	
    DEBUG(printf("\nDIPCAL: type = %d",type);)
                     /* 3 Points to define a plane */
    triplet[0].x=spots[5][1];
@@ -52,19 +53,16 @@ double *xl, *ym, *zn; /* direction cosines of lines */
    triplet[2].x=spots[pairs[jno][1]][1];
    triplet[2].y=spots[pairs[jno][1]][2];
    triplet[2].z=spots[pairs[jno][1]][3];
-
    normalvect(triplet,&dips[jno][0],&dips[jno][1],&dips[jno][2]);
 
    suml=dips[1][0]; /* the X, Y, Z components of the normal vector */
    summ=dips[1][1];
    sumn=dips[1][2];
-
    r=(suml*suml)+(summ*summ)+(sumn*sumn);
    r=sqrt(r);        /* r is the magnitude of the normal vector */
    *xl=suml/r;    /* the X, Y, Z components of a unit normal vector */
    *ym=summ/r;    /* also the cos() of the associated angles */
    *zn=sumn/r;
-                                                             
    if (*zn >= 0.0)
    {            /* the angle to the z of the normal vector */
       *dip=(acos(*zn)*57.296);
