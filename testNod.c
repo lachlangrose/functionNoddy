@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "noddy.h"
 //##include "lineEvnt.h"
 #define DEBUG(X)	X
@@ -9,17 +10,18 @@
 extern int noddy (DATA_INPUT, DATA_OUTPUT, int, char *, char *,
                   BLOCK_VIEW_OPTIONS *, GEOPHYSICS_OPTIONS *);
 
-const char* getField(char* line, int num)
+
+const char* getfield(char* line, int num)
 {
-	const char * tok;
-	for (tok = strtok(line, ",");
-		tok  && *tok;
-		tok = strtok(NULL, ",\n"))
-	{
-			if (!--num)
-					return tok;
-	}
-	return NULL;
+    const char* tok;
+    for (tok = strtok(line, ",");
+            tok && *tok;
+            tok = strtok(NULL, ",\n"))
+    {
+        if (!--num)
+            return tok;
+    }
+    return NULL;
 }
 int main (int argc, char *argv[])
 {
@@ -202,27 +204,50 @@ int main (int argc, char *argv[])
 	}
 	if (lFile != NULL) {
 	printf("\n Using locations csv \n");
-	char line[100];
+	char* line;
 	size_t len = 0;
 	ssize_t read;
-	char *x, y, z;
-	while ((read = getline(line, 100, lFile)) != -1) {
-			char *x = strdup(line);
-			getField(x,0);
+	int lin_no = 0;
+	double x = 0.;
+	double y = 0.;
+	double z = 0.;
+	int i = 0;
+	while ((read = getline(&line,&len, lFile)) != -1) {
+		if (lin_no == 0) {
+			lin_no++;
+			continue;
+		}
+		getfield(line,0);
+		x = atof(line);
+
+		getfield(line,1);
+		y = atof(line);
+
+		getfield(line,2);
+		z = atof(line);
+
+		printf("%f %f %f \n",x, y, z);
+		//sscanf(line, "%i,%i,%i", x, y, z);
+		//printf("%f %f %f \n", x,y,z);
+		//printf("%s \n",line);
+		//	char *tmp = strdup(&line);
+		//	printf(" this %c\n",tmp);
+		//	printf("Field 3 would be %s\n", getfield(tmp, 0));
+        //	// NOTE strtok clobbers tmp
+        //	free(tmp);
 			//getField(&y,0);
 			//getField(&z,0);
 			// printf("%c %c %c \n", x,x,x);
-			// for (ne = 0; ne<numEvents; ne++){
-			// 		calcOrientation(x,y,z,4,ne,&dip,&dipdir);
-			// 		fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-			// 						x,y,z,dip,dipdir+90,ne);	
-			// 	}			
-			// 	//export bedding 
-			// 	calcOrientation(x,y,z,3,4,&dip,&dipdir);
-			// 		fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-			// 						x,y,z,dip,dipdir+90,numEvents);
-		printf("%s", line);
-	}
+	for (ne = 0; ne<numEvents; ne++){
+			calcOrientation(x,y,z,4,ne,&dip,&dipdir);
+			fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
+							x,y,z,dip,dipdir+90,ne);	
+		}			
+		//export bedding 
+		calcOrientation(x,y,z,3,4,&dip,&dipdir);
+			fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
+							x,y,z,dip,dipdir+90,numEvents);
+		}
 	free(line);
 	fclose(lFile);
 

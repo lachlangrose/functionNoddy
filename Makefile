@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS =  -Wno-all
+CFLAGS =  -w#-Wno-all
 LDFLAGS = -lm
 TARGET = noddy.exe
 SRCS = $(wildcard *.c)
