@@ -295,7 +295,7 @@ OBJECT *object;
          memcpy ((char *) &(tabs[group].region), (char *) &(iconRects[numIcon++]), sizeof(RCT));
          tabs[group].win = createPositionedWindow(GMA_WINDOW,
                            win, groupXPos, groupYPos,
-                           EM_ALL, GMA_WINDOW_eh, (long) object, &posRect);
+                           EM_ALL, TGMA_WINDOW_eh, (long) object, &posRect);
          group++;
 
          strcpy (tabs[group].label, "Form");
