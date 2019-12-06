@@ -9,7 +9,18 @@
 extern int noddy (DATA_INPUT, DATA_OUTPUT, int, char *, char *,
                   BLOCK_VIEW_OPTIONS *, GEOPHYSICS_OPTIONS *);
 
-
+const char* getField(char* line, int num)
+{
+	const char * tok;
+	for (tok = strtok(line, ",");
+		tok  && *tok;
+		tok = strtok(NULL, ",\n"))
+	{
+			if (!--num)
+					return tok;
+	}
+	return NULL;
+}
 int main (int argc, char *argv[])
 {
 
@@ -21,6 +32,7 @@ int main (int argc, char *argv[])
 	int orientation=0; /*LG hack for orientations*/
 	char exportname[250];
 	char orientationname[250];
+	char locationname[250];
    if (argc < 4)
    {
       printf ("Arguments <historyfile> <outputfile> <calc_mode>:\nBLOCK\nGEOPHYSICS\nSURFACES\nBLOCK_GEOPHYS\nBLOCK_SURFACES\nRESTORATION\nALL\n");
@@ -49,9 +61,11 @@ int main (int argc, char *argv[])
    else if (!strcmp(argv[3],"ORIENTATION")){
 		mode=1;
 		orientation=1;
-		printf("exporting orientation");
+		printf("\n Exporting orientation \n");
 		sprintf((char *) orientationname,argv[4]);
 		sprintf((char *) exportname,"%s_ori.csv",argv[2]);
+		sprintf((char *) locationname,argv[4]);
+		printf("\n %s \n",locationname);
    }
 		else
    {
@@ -131,18 +145,12 @@ int main (int argc, char *argv[])
 	FILE * pFile;
 	pFile = fopen(exportname,"w");
 	printf("%s",exportname);
+	printf("\n %s \n",locationname);
 	if( pFile == NULL ){
 		printf("Error while opening the output file: %s\n",exportname);
 		return (FALSE);
 	}
-	///FILE * inFile;
-	///char c[1000]; 
-	///char buffer[256];
-	///int i, j,k;
-	///double coords[3];
-	///int event, type;
-	///event = 0;
-	///type = 3;
+
 	double dip, dipdir;
 	dip = 0.;
 	dipdir = 0.;
@@ -150,31 +158,9 @@ int main (int argc, char *argv[])
    	int numEvents;
    	numEvents = (int) totalObjects(win);
 
-	///inFile= fopen(orientationname, "r");
-	///while (fgets(c, sizeof(c),inFile)) {
-	///j = 0;
-	///k=0;
-	///for (i = 0; i<strlen(c); i++){
-	///	if (c[i] == ','){
-	///		j=0;
-	///		coords[k] = atof(buffer);
-	///		k++;
-	///		continue;
-	///		if (k == 3){
-	///			type = atoi(buffer);
-	///			k++;
-	///		continue;}
-	///	   if (k == 4){
-	///		   event = atoi(buffer);	   
-	///		   k++;}
-	///	}
-	///	buffer[j]=c[i];
-	///	j+=1;
-	///}
-	//
 	BLOCK_VIEW_OPTIONS *viewOptions = NULL;
 //	
-    printf("events %i",numEvents);
+    printf("events %i \n",numEvents);
 	viewOptions = getViewOptions();
 	if( viewOptions == NULL ){
 		printf("Error while getting the dimensions.\n");
@@ -182,6 +168,10 @@ int main (int argc, char *argv[])
 	}
 	//z = 5000;
 	fprintf(pFile,"%s\t%s\t%s\t%s\t%s\t%s\t\n","x","y","z","dip","strike","event");
+	FILE * lFile;
+	lFile = fopen(locationname,"r");
+	if( lFile == NULL ) {
+			printf("No locations specified using a regular grid \n");
 		    for(y= viewOptions->originY;  
 						y<= viewOptions->originY + viewOptions->lengthY; 
 						y+= viewOptions->geologyCubeSize*10 ){
@@ -198,19 +188,7 @@ int main (int argc, char *argv[])
 					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
 									x,y,z,dip,dipdir+90,ne);
 					
-					//calcOrientation(x,y,z,4,1,&dip,&dipdir);
-					//					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-					//									x,y,z,dip,dipdir,1);
-					//calcOrientation(x,y,z,4,2,&dip,&dipdir);
-					//					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-					//									x,y,z,dip,dipdir,2);
-					//					
-					//calcOrientation(x,y,x,4,3,&dip,&dipdir);
-					//					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-					//									x,y,z,dip,dipdir,3);
-					//calcOrientation(x,y,z,3,4,&dip,&dipdir);
-					//					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-					//									x,y,z,dip,dipdir,4);		
+					
 				}			
 				//export bedding 
 				calcOrientation(x,y,z,3,4,&dip,&dipdir);
@@ -221,10 +199,39 @@ int main (int argc, char *argv[])
 			}
 			}
 		}
-	
-	fclose(pFile);
+	}
+	if (lFile != NULL) {
+	printf("\n Using locations csv \n");
+	char line[100];
+	size_t len = 0;
+	ssize_t read;
+	char *x, y, z;
+	while ((read = getline(line, 100, lFile)) != -1) {
+			char *x = strdup(line);
+			getField(x,0);
+			//getField(&y,0);
+			//getField(&z,0);
+			// printf("%c %c %c \n", x,x,x);
+			// for (ne = 0; ne<numEvents; ne++){
+			// 		calcOrientation(x,y,z,4,ne,&dip,&dipdir);
+			// 		fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
+			// 						x,y,z,dip,dipdir+90,ne);	
+			// 	}			
+			// 	//export bedding 
+			// 	calcOrientation(x,y,z,3,4,&dip,&dipdir);
+			// 		fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
+			// 						x,y,z,dip,dipdir+90,numEvents);
+		printf("%s", line);
+	}
+	free(line);
+	fclose(lFile);
+
+
 	//fclose(inFile);
 	
+
+   }
+	fclose(pFile);
 
    }
 
