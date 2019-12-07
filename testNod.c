@@ -13,13 +13,16 @@ extern int noddy (DATA_INPUT, DATA_OUTPUT, int, char *, char *,
 
 const char* getfield(char* line, int num)
 {
-    const char* tok;
+    char* tok;
+    int i = 0;
     for (tok = strtok(line, ",");
             tok && *tok;
             tok = strtok(NULL, ",\n"))
     {
-        if (!--num)
+        if (i == num) {
             return tok;
+	}
+	i++;
     }
     return NULL;
 }
@@ -203,59 +206,35 @@ int main (int argc, char *argv[])
 		}
 	}
 	if (lFile != NULL) {
-	printf("\n Using locations csv \n");
-	char* line;
-	size_t len = 0;
-	ssize_t read;
-	int lin_no = 0;
-	double x = 0.;
-	double y = 0.;
-	double z = 0.;
-	int i = 0;
-	while ((read = getline(&line,&len, lFile)) != -1) {
-		if (lin_no == 0) {
-			lin_no++;
+	char line[1024];
+	int linen = 0;
+	while (fgets(line,1024,lFile)) {
+		if (linen == 0){
+
+			linen++;
 			continue;
 		}
-		getfield(line,0);
-		x = atof(line);
+		char* tmp = strdup(line);
+		//printf("%s\n",tmp);
+		tmp = strdup(line);
+		double x = atof(getfield(tmp,0));// = sscanf("%f",getfield(tmp,0));
+		tmp = strdup(line);
+		double y = atof(getfield(tmp,1));// = sscanf("%f",getfield(tmp,0));
+		tmp = strdup(line);
+		double z = atof(getfield(tmp,2));// = sscanf("%f",getfield(tmp,0));
 
-		getfield(line,1);
-		y = atof(line);
-
-		getfield(line,2);
-		z = atof(line);
-
-		printf("%f %f %f \n",x, y, z);
-		//sscanf(line, "%i,%i,%i", x, y, z);
-		//printf("%f %f %f \n", x,y,z);
-		//printf("%s \n",line);
-		//	char *tmp = strdup(&line);
-		//	printf(" this %c\n",tmp);
-		//	printf("Field 3 would be %s\n", getfield(tmp, 0));
-        //	// NOTE strtok clobbers tmp
-        //	free(tmp);
-			//getField(&y,0);
-			//getField(&z,0);
-			// printf("%c %c %c \n", x,x,x);
-	for (ne = 0; ne<numEvents; ne++){
+		for (ne = 0; ne<numEvents; ne++){
 			calcOrientation(x,y,z,4,ne,&dip,&dipdir);
 			fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-							x,y,z,dip,dipdir+90,ne);	
-		}			
-		//export bedding 
+				x,y,z,dip,dipdir+90,ne);
+			}			
+				//export bedding 
 		calcOrientation(x,y,z,3,4,&dip,&dipdir);
-			fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-							x,y,z,dip,dipdir+90,numEvents);
-		}
-	free(line);
-	fclose(lFile);
-
-
-	//fclose(inFile);
-	
-
-   }
+					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
+					x,y,z,dip,dipdir+90,numEvents);
+		free(tmp);
+	}
+   	}
 	fclose(pFile);
 
    }

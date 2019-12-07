@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS =  -w#-Wno-all
 LDFLAGS = -lm
-TARGET = noddy.exe
+TARGET = noddy
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:%.c=%.o)
 
