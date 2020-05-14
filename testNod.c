@@ -172,7 +172,7 @@ int main (int argc, char *argv[])
 		return (FALSE);
 	}
 	//z = 5000;
-	fprintf(pFile,"%s\t%s\t%s\t%s\t%s\t%s\t\n","x","y","z","dip","strike","event");
+	fprintf(pFile,"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n","x","y","z","dip","strike","event","x2","y2","z2","index","rocktype");
 	FILE * lFile;
 	lFile = fopen(locationname,"r");
 	if( lFile == NULL ) {
@@ -190,15 +190,20 @@ int main (int argc, char *argv[])
 				//export ori of all events
 				for (ne = 0; ne<numEvents; ne++){
 					calcOrientation(x,y,z,4,ne,&dip,&dipdir);
-					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-									x,y,z,dip,dipdir+90,ne);
+					x2=x; y2=y; z2=z;
+					whereRock(&x2, &y2, &z2,&rockType,&index);
+			   		// fprintf(pFile,"%d\t%d\t%lf\t%lf\t%lf\n",index,rockType,x2,y2,z2);
+					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t%f\t%f\t%f\t%f\t%f\t\n",	
+									x,y,z,dip,dipdir+90,ne,x2,y2,z2,index,rockType);
 					
 					
 				}			
 				//export bedding 
 				calcOrientation(x,y,z,3,4,&dip,&dipdir);
-					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-									x,y,z,dip,dipdir+90,numEvents);
+				whereRock(&x2, &y2, &z2,&rockType,&index);
+
+				fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t%f\t%f\t%f\t%f\t%f\t\n",	
+									x,y,z,dip,dipdir+90,numEvents,x2,y2,z2,index,rockType);
 				
 
 			}
@@ -225,13 +230,17 @@ int main (int argc, char *argv[])
 
 		for (ne = 0; ne<numEvents; ne++){
 			calcOrientation(x,y,z,4,ne,&dip,&dipdir);
-			fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-				x,y,z,dip,dipdir+90,ne);
+			x2=x; y2=y; z2=z;
+			whereRock(&x2, &y2, &z2,&rockType,&index);
+			fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t%f\t%f\t%f\t%f\t%f\t\n",	
+				x,y,z,dip,dipdir+90,ne,x2,y2,z2,index,rockType);
 			}			
 				//export bedding 
 		calcOrientation(x,y,z,3,4,&dip,&dipdir);
-					fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t\n",	
-					x,y,z,dip,dipdir+90,numEvents);
+		x2=x; y2=y; z2=z;
+		whereRock(&x2, &y2, &z2,&rockType,&index);
+		fprintf(pFile,"%f\t%f\t%f\t%f\t%f\t%i\t%f\t%f\t%f\t%f\t%f\t\n",	
+		x,y,z,dip,dipdir+90,numEvents,x2,y2,z2,index,rockType);
 		free(tmp);
 	}
    	}

@@ -234,3 +234,7 @@ pip-log.txt
 *.mag
 *.o
 *.csv
+.vs/functionNoddy/v15/Browse.VC.db
+.vs/ProjectSettings.json
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
